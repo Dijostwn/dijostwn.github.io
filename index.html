@@ -20,27 +20,28 @@
         .download-btn { padding: 10px 15px; background-color: #007bff; color: white; border: none; border-radius: 4px; cursor: pointer; margin-left: 10px; font-weight: bold; }
         .pdf-btn { padding: 10px 15px; background-color: #dc3545; color: white; border: none; border-radius: 4px; cursor: pointer; margin-left: 10px; font-weight: bold; }
 
-        /* Kelas untuk menyembunyikan kolom aksi saat dicetak ke PDF */
+        /* Kelas untuk menyembunyikan elemen saat dicetak ke PDF */
         @media print {
             .aksi-kolom { display: none !important; }
             .no-print { display: none !important; }
+            .hide-on-pdf { display: none !important; } /* Baru */
         }
     </style>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
 </head>
 <body>
-    <div class="container" id="content-to-print">
-        <h1>Aplikasi Stok Barang (Terpusat) 🌍</h1>
-        <div id="api-status" class="info-api">Menghubungkan ke API Server...</div>
+    <div class="container">
+        <h1 class="hide-on-pdf">Aplikasi Stok Barang (Terpusat) 🌍</h1>
+        <div id="api-status" class="info-api hide-on-pdf">Menghubungkan ke API Server...</div>
 
-        <h2>Tambah Barang Baru</h2>
-        <form id="form-tambah" class="no-print">
+        <h2 class="hide-on-pdf">Tambah Barang Baru</h2>
+        <form id="form-tambah" class="no-print hide-on-pdf">
             <input type="text" id="nama-barang" placeholder="Nama Barang" required>
             <input type="number" id="kuantitas" placeholder="Kuantitas" required min="1">
             <button type="submit">Tambah Stok</button>
         </form>
 
-        <div style="display: flex; justify-content: space-between; align-items: center;">
+        <div style="display: flex; justify-content: space-between; align-items: center;" class="hide-on-pdf">
             <h2>Daftar Stok</h2>
             <div class="no-print">
                 <button class="download-btn" onclick="downloadInventoryAsCSV()">⬇️ Unduh CSV</button>
@@ -48,10 +49,13 @@
             </div>
         </div>
         
-        <table id="tabel-stok">
-            <thead><tr><th>ID</th><th>Nama Barang</th><th>Kuantitas</th><th class="aksi-kolom">Aksi</th></tr></thead>
-            <tbody id="data-stok"></tbody>
-        </table>
+        <div id="pdf-content"> 
+            <h2>Daftar Stok</h2> 
+            <table id="tabel-stok">
+                <thead><tr><th>ID</th><th>Nama Barang</th><th>Kuantitas</th><th class="aksi-kolom">Aksi</th></tr></thead>
+                <tbody id="data-stok"></tbody>
+            </table>
+        </div>
     </div>
 
     <script>
@@ -105,7 +109,8 @@
         
         // --- FUNGSI DOWNLOAD PDF ---
         function downloadInventoryAsPDF() {
-            const element = document.getElementById('content-to-print'); // Kontainer utama
+            // Targetkan hanya div #pdf-content
+            const element = document.getElementById('pdf-content'); 
 
             // Opsi konfigurasi untuk PDF
             const options = {

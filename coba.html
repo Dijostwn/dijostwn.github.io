@@ -16,33 +16,35 @@
         }
         .container {
             max-width: 800px;
-            margin: auto;
+            margin: 30px auto;
             background: white;
-            padding: 20px;
-            border-radius: 8px;
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
         }
         #form-tambah {
             display: flex;
             gap: 10px;
-            margin-bottom: 20px;
+            margin-bottom: 30px;
             padding: 15px;
-            border: 1px solid #ccc;
-            border-radius: 4px;
+            background-color: #eaf6ff;
+            border: 1px solid #cceeff;
+            border-radius: 6px;
         }
         #form-tambah input {
-            padding: 10px;
+            padding: 12px;
             flex-grow: 1;
             border: 1px solid #ddd;
             border-radius: 4px;
         }
         #form-tambah button {
-            padding: 10px 20px;
+            padding: 12px 25px;
             background-color: #007bff;
             color: white;
             border: none;
             border-radius: 4px;
             cursor: pointer;
+            font-weight: bold;
             transition: background-color 0.3s;
         }
         #form-tambah button:hover {
@@ -54,21 +56,24 @@
             margin-top: 20px;
         }
         #tabel-stok th, #tabel-stok td {
-            border: 1px solid #ddd;
-            padding: 12px;
+            border: 1px solid #e0e0e0;
+            padding: 15px;
             text-align: left;
         }
         #tabel-stok th {
-            background-color: #e9ecef;
-            color: #333;
+            background-color: #f0f0f0;
+            color: #555;
+        }
+        #tabel-stok tr:nth-child(even) {
+            background-color: #f9f9f9;
         }
         .action-btn {
-            padding: 5px 10px;
-            margin-left: 5px;
+            padding: 8px 12px;
             border: none;
-            border-radius: 3px;
+            border-radius: 4px;
             cursor: pointer;
             color: white;
+            font-size: 14px;
         }
         .delete-btn {
             background-color: #dc3545;
@@ -80,8 +85,8 @@
 </head>
 <body>
     <div class="container">
-        <h1>Aplikasi Stok Barang (Lokal) 💾</h1>
-        <p>Data disimpan di browser Anda (LocalStorage).</p>
+        <h1>Aplikasi Stok Barang (Lokal) 📦</h1>
+        <p>Data disimpan di browser Anda (**Local Storage**).</p>
 
         <h2>Tambah Barang Baru</h2>
         <form id="form-tambah">
@@ -106,30 +111,31 @@
     </div>
 
     <script>
-        const STORAGE_KEY = 'inventory_app_stok';
+        const STORAGE_KEY = 'inventory_app_stok_v2'; // Menggunakan kunci baru untuk menghindari konflik
         const formTambah = document.getElementById('form-tambah');
         const dataStokBody = document.getElementById('data-stok');
 
-        // --- Fungsi Utama ---
+        // --- Fungsi Manajemen Data ---
 
-        // 1. Ambil data dari LocalStorage
         function getStok() {
+            // Mengambil data dari LocalStorage. Jika kosong, mengembalikan array kosong.
             const data = localStorage.getItem(STORAGE_KEY);
             return data ? JSON.parse(data) : [];
         }
 
-        // 2. Simpan data ke LocalStorage
         function saveStok(stok) {
+            // Menyimpan array stok ke LocalStorage
             localStorage.setItem(STORAGE_KEY, JSON.stringify(stok));
         }
+        
+        // --- Fungsi Tampilan (Render) ---
 
-        // 3. Render (Menampilkan) data ke tabel
         function renderStok() {
             const stok = getStok();
-            dataStokBody.innerHTML = ''; // Kosongkan tabel
+            dataStokBody.innerHTML = ''; // Mengosongkan tabel sebelum diisi ulang
             
             if (stok.length === 0) {
-                dataStokBody.innerHTML = '<tr><td colspan="4" style="text-align: center;">Belum ada barang dalam stok.</td></tr>';
+                dataStokBody.innerHTML = '<tr><td colspan="4" style="text-align: center; color: #888;">Belum ada barang dalam stok.</td></tr>';
                 return;
             }
 
@@ -137,18 +143,22 @@
                 const row = dataStokBody.insertRow();
                 row.insertCell().textContent = item.id;
                 row.insertCell().textContent = item.name;
-                row.insertCell().textContent = item.quantity;
-                
+                row.insertCell().textContent = item.quantity.toLocaleString('id-ID'); // Format angka
+
+                // Membuat tombol Hapus
                 const actionCell = row.insertCell();
                 const deleteButton = document.createElement('button');
                 deleteButton.textContent = 'Hapus';
                 deleteButton.className = 'action-btn delete-btn';
-                deleteButton.onclick = () => deleteItem(item.id);
+                // Menghubungkan tombol hapus ke fungsi deleteItem
+                deleteButton.onclick = () => deleteItem(item.id); 
                 actionCell.appendChild(deleteButton);
             });
         }
 
-        // 4. Tambah Item Baru
+        // --- Fungsi Aksi ---
+        
+        // Aksi Tambah Item
         formTambah.addEventListener('submit', function(e) {
             e.preventDefault();
             
@@ -158,34 +168,41 @@
             const name = namaInput.value.trim();
             const quantity = parseInt(kuantitasInput.value);
 
+            // Validasi input
             if (name === "" || isNaN(quantity) || quantity <= 0) {
-                alert("Nama dan Kuantitas harus diisi dengan benar.");
+                alert("Nama barang harus diisi, dan kuantitas harus angka positif.");
                 return;
             }
 
-            const stok = getStok();
+            let stok = getStok();
+            // Menentukan ID baru (selalu ID tertinggi + 1)
             const newId = stok.length > 0 ? Math.max(...stok.map(i => i.id)) + 1 : 1;
 
             const newItem = { id: newId, name: name, quantity: quantity };
             stok.push(newItem);
-            saveStok(stok);
-
+            saveStok(stok); // Menyimpan data baru
+            
             // Reset form
             namaInput.value = '';
             kuantitasInput.value = '';
             
-            renderStok();
+            renderStok(); // **Pembaruan Tampilan**
         });
 
-        // 5. Hapus Item
+        // Aksi Hapus Item
         function deleteItem(id) {
-            if (confirm("Apakah Anda yakin ingin menghapus barang ini?")) {
+            if (confirm("Apakah Anda yakin ingin menghapus barang dengan ID " + id + " dari stok?")) {
                 let stok = getStok();
+                // Filter array untuk menghapus item berdasarkan ID
                 stok = stok.filter(item => item.id !== id);
                 saveStok(stok);
-                renderStok();
+                renderStok(); // **Pembaruan Tampilan**
             }
         }
 
-        // --- Inisialisasi ---
-        renderStok();
+        // --- Inisialisasi Aplikasi ---
+        document.addEventListener('DOMContentLoaded', renderStok);
+        // Memuat stok saat halaman pertama kali dimuat.
+    </script>
+</body>
+</html>

@@ -3,90 +3,28 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Aplikasi Stok Barang Sederhana</title>
+    <title>Aplikasi Stok Barang Sentral - Final</title>
     <style>
-        body {
-            font-family: Arial, sans-serif;
-            margin: 20px;
-            background-color: #f4f4f9;
-        }
-        h1 {
-            color: #333;
-            text-align: center;
-        }
-        .container {
-            max-width: 800px;
-            margin: 30px auto;
-            background: white;
-            padding: 30px;
-            border-radius: 10px;
-            box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
-        }
-        #form-tambah {
-            display: flex;
-            gap: 10px;
-            margin-bottom: 30px;
-            padding: 15px;
-            background-color: #eaf6ff;
-            border: 1px solid #cceeff;
-            border-radius: 6px;
-        }
-        #form-tambah input {
-            padding: 12px;
-            flex-grow: 1;
-            border: 1px solid #ddd;
-            border-radius: 4px;
-        }
-        #form-tambah button {
-            padding: 12px 25px;
-            background-color: #007bff;
-            color: white;
-            border: none;
-            border-radius: 4px;
-            cursor: pointer;
-            font-weight: bold;
-            transition: background-color 0.3s;
-        }
-        #form-tambah button:hover {
-            background-color: #0056b3;
-        }
-        #tabel-stok {
-            width: 100%;
-            border-collapse: collapse;
-            margin-top: 20px;
-        }
-        #tabel-stok th, #tabel-stok td {
-            border: 1px solid #e0e0e0;
-            padding: 15px;
-            text-align: left;
-        }
-        #tabel-stok th {
-            background-color: #f0f0f0;
-            color: #555;
-        }
-        #tabel-stok tr:nth-child(even) {
-            background-color: #f9f9f9;
-        }
-        .action-btn {
-            padding: 8px 12px;
-            border: none;
-            border-radius: 4px;
-            cursor: pointer;
-            color: white;
-            font-size: 14px;
-        }
-        .delete-btn {
-            background-color: #dc3545;
-        }
-        .delete-btn:hover {
-            background-color: #c82333;
-        }
+        body { font-family: Arial, sans-serif; margin: 20px; background-color: #f4f4f9; }
+        h1 { color: #333; text-align: center; }
+        .container { max-width: 800px; margin: 30px auto; background: white; padding: 30px; border-radius: 10px; box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15); }
+        .info-api { background-color: #d4edda; border-left: 5px solid #28a745; padding: 10px; margin-bottom: 20px; color: #155724; }
+        #form-tambah { display: flex; gap: 10px; margin-bottom: 30px; }
+        #form-tambah input { padding: 12px; flex-grow: 1; border: 1px solid #ddd; border-radius: 4px; }
+        #form-tambah button { padding: 12px 25px; background-color: #28a745; color: white; border: none; border-radius: 4px; cursor: pointer; font-weight: bold; transition: background-color 0.3s; }
+        #form-tambah button:hover { background-color: #1e7e34; }
+        #tabel-stok { width: 100%; border-collapse: collapse; margin-top: 20px; }
+        #tabel-stok th, #tabel-stok td { border: 1px solid #e0e0e0; padding: 15px; text-align: left; }
+        #tabel-stok th { background-color: #e9ecef; color: #333; }
+        .delete-btn { background-color: #dc3545; color: white; border: none; padding: 8px 12px; border-radius: 4px; cursor: pointer; }
     </style>
 </head>
 <body>
     <div class="container">
-        <h1>Aplikasi Stok Barang (Lokal) 📦</h1>
-        <p>Data disimpan di browser Anda (**Local Storage**).</p>
+        <h1>Aplikasi Stok Barang (Terpusat) 🌍</h1>
+        <div id="api-status" class="info-api">
+            Menghubungkan ke API Server...
+        </div>
 
         <h2>Tambah Barang Baru</h2>
         <form id="form-tambah">
@@ -111,98 +49,116 @@
     </div>
 
     <script>
-        const STORAGE_KEY = 'inventory_app_stok_v2'; // Menggunakan kunci baru untuk menghindari konflik
+        // *** GANTI DENGAN URL PUBLIK DARI RENDER/RAILWAY ANDA ***
+        const API_BASE_URL = 'http://localhost:5000'; // UBAH INI SAAT DEPLOY KE URL PUBLIK ANDA!
+        // Contoh: 'https://nama-unik-anda.onrender.com'
+
+        const API_URL = `${API_BASE_URL}/api/items`;
         const formTambah = document.getElementById('form-tambah');
         const dataStokBody = document.getElementById('data-stok');
+        const apiStatus = document.getElementById('api-status');
 
-        // --- Fungsi Manajemen Data ---
+        // --- Fungsi Utama (READ) ---
+        async function fetchItems() {
+            try {
+                // Minta data dari server publik
+                const response = await fetch(API_URL); 
+                
+                if (!response.ok) {
+                    apiStatus.textContent = `Error: Gagal terhubung ke API Server (${response.status} - Pastikan server berjalan!)`;
+                    apiStatus.style.backgroundColor = '#f8d7da';
+                    apiStatus.style.borderColor = '#f5c6cb';
+                    dataStokBody.innerHTML = '<tr><td colspan="4" style="color:red; text-align:center;">Koneksi API Gagal.</td></tr>';
+                    return;
+                }
+                
+                const stok = await response.json();
+                
+                apiStatus.textContent = `Tersambung ke Server: ${API_BASE_URL}`;
+                apiStatus.style.backgroundColor = '#d4edda';
+                apiStatus.style.borderColor = '#28a745';
 
-        function getStok() {
-            // Mengambil data dari LocalStorage. Jika kosong, mengembalikan array kosong.
-            const data = localStorage.getItem(STORAGE_KEY);
-            return data ? JSON.parse(data) : [];
-        }
+                dataStokBody.innerHTML = ''; // Kosongkan tabel
+                
+                if (stok.length === 0) {
+                    dataStokBody.innerHTML = '<tr><td colspan="4" style="text-align: center; color: #888;">Belum ada barang di server.</td></tr>';
+                    return;
+                }
 
-        function saveStok(stok) {
-            // Menyimpan array stok ke LocalStorage
-            localStorage.setItem(STORAGE_KEY, JSON.stringify(stok));
-        }
-        
-        // --- Fungsi Tampilan (Render) ---
+                stok.forEach(item => {
+                    const row = dataStokBody.insertRow();
+                    row.insertCell().textContent = item.id;
+                    row.insertCell().textContent = item.name;
+                    row.insertCell().textContent = item.quantity ? item.quantity.toLocaleString('id-ID') : 0; 
 
-        function renderStok() {
-            const stok = getStok();
-            dataStokBody.innerHTML = ''; // Mengosongkan tabel sebelum diisi ulang
-            
-            if (stok.length === 0) {
-                dataStokBody.innerHTML = '<tr><td colspan="4" style="text-align: center; color: #888;">Belum ada barang dalam stok.</td></tr>';
-                return;
+                    const actionCell = row.insertCell();
+                    const deleteButton = document.createElement('button');
+                    deleteButton.textContent = 'Hapus';
+                    deleteButton.className = 'delete-btn';
+                    deleteButton.onclick = () => deleteItem(item.id); 
+                    actionCell.appendChild(deleteButton);
+                });
+
+            } catch (error) {
+                console.error("Error Fetching:", error);
+                apiStatus.textContent = 'Error Jaringan: Tidak dapat menghubungi server API.';
+                apiStatus.style.backgroundColor = '#f8d7da';
+                apiStatus.style.borderColor = '#f5c6cb';
+                dataStokBody.innerHTML = '<tr><td colspan="4" style="color:red; text-align:center;">Periksa koneksi server Anda.</td></tr>';
             }
-
-            stok.forEach(item => {
-                const row = dataStokBody.insertRow();
-                row.insertCell().textContent = item.id;
-                row.insertCell().textContent = item.name;
-                row.insertCell().textContent = item.quantity.toLocaleString('id-ID'); // Format angka
-
-                // Membuat tombol Hapus
-                const actionCell = row.insertCell();
-                const deleteButton = document.createElement('button');
-                deleteButton.textContent = 'Hapus';
-                deleteButton.className = 'action-btn delete-btn';
-                // Menghubungkan tombol hapus ke fungsi deleteItem
-                deleteButton.onclick = () => deleteItem(item.id); 
-                actionCell.appendChild(deleteButton);
-            });
         }
 
-        // --- Fungsi Aksi ---
-        
-        // Aksi Tambah Item
-        formTambah.addEventListener('submit', function(e) {
+        // --- Fungsi Tambah (CREATE) ---
+        formTambah.addEventListener('submit', async function(e) {
             e.preventDefault();
             
-            const namaInput = document.getElementById('nama-barang');
-            const kuantitasInput = document.getElementById('kuantitas');
-            
-            const name = namaInput.value.trim();
-            const quantity = parseInt(kuantitasInput.value);
+            const name = document.getElementById('nama-barang').value.trim();
+            const quantity = parseInt(document.getElementById('kuantitas').value);
 
-            // Validasi input
             if (name === "" || isNaN(quantity) || quantity <= 0) {
-                alert("Nama barang harus diisi, dan kuantitas harus angka positif.");
+                alert("Input tidak valid.");
                 return;
             }
 
-            let stok = getStok();
-            // Menentukan ID baru (selalu ID tertinggi + 1)
-            const newId = stok.length > 0 ? Math.max(...stok.map(i => i.id)) + 1 : 1;
+            try {
+                const response = await fetch(API_URL, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ name, quantity }) 
+                });
 
-            const newItem = { id: newId, name: name, quantity: quantity };
-            stok.push(newItem);
-            saveStok(stok); // Menyimpan data baru
-            
-            // Reset form
-            namaInput.value = '';
-            kuantitasInput.value = '';
-            
-            renderStok(); // **Pembaruan Tampilan**
+                if (!response.ok) throw new Error('Gagal menambahkan item ke server');
+
+                document.getElementById('nama-barang').value = '';
+                document.getElementById('kuantitas').value = '';
+                
+                fetchItems(); // Muat ulang data dari server
+
+            } catch (error) {
+                alert("Gagal terhubung ke server untuk menambah item. Pastikan API berjalan.");
+            }
         });
 
-        // Aksi Hapus Item
-        function deleteItem(id) {
-            if (confirm("Apakah Anda yakin ingin menghapus barang dengan ID " + id + " dari stok?")) {
-                let stok = getStok();
-                // Filter array untuk menghapus item berdasarkan ID
-                stok = stok.filter(item => item.id !== id);
-                saveStok(stok);
-                renderStok(); // **Pembaruan Tampilan**
+        // --- Fungsi Hapus (DELETE) ---
+        async function deleteItem(id) {
+            if (!confirm("Apakah Anda yakin ingin menghapus barang ID " + id + "?")) return;
+            
+            try {
+                const response = await fetch(`${API_URL}/${id}`, {
+                    method: 'DELETE'
+                });
+
+                if (!response.ok) throw new Error('Gagal menghapus item dari server');
+                
+                fetchItems(); // Muat ulang data dari server
+
+            } catch (error) {
+                alert("Gagal menghapus: Periksa koneksi ke server.");
             }
         }
 
-        // --- Inisialisasi Aplikasi ---
-        document.addEventListener('DOMContentLoaded', renderStok);
-        // Memuat stok saat halaman pertama kali dimuat.
+        // --- Inisialisasi ---
+        document.addEventListener('DOMContentLoaded', fetchItems);
     </script>
 </body>
 </html>

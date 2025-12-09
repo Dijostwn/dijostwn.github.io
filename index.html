@@ -3,13 +3,13 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Formulir Lamaran Kerja Profesional</title>
+    <title>Formulir Lamaran Kerja Statis</title>
     
     <style>
-        /* CSS Dasar & Reset */
+        /* CSS Dasar: Reset & Font */
         body { 
-            font-family: 'Poppins', sans-serif; /* Mengganti font yang lebih modern */
-            background-color: #f7f9fc; /* Latar belakang sangat lembut */
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; 
+            background-color: #f0f2f5; 
             margin: 0;
             padding: 0;
             display: flex;
@@ -21,35 +21,35 @@
         /* Container Formulir */
         .form-container {
             width: 100%;
-            max-width: 480px; /* Sedikit dikecilkan agar terlihat fokus */
-            padding: 35px;
+            max-width: 500px;
+            padding: 40px;
             background-color: #ffffff;
-            border-radius: 15px; /* Sudut lebih melengkung */
-            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08); /* Bayangan lebih halus dan lebar */
-            border-top: 5px solid #007bff; /* Garis biru sebagai aksen */
+            border-radius: 12px;
+            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.1);
         }
 
         /* Heading */
         h1 {
-            color: #333;
+            color: #1a1a2e;
             text-align: center;
             margin-bottom: 30px;
-            font-size: 1.7em;
-            font-weight: 700;
+            font-size: 1.8em;
+            border-bottom: 2px solid #e0e0e0;
+            padding-bottom: 10px;
         }
 
         /* Form Group */
         .form-group {
-            margin-bottom: 25px; /* Jarak antar grup lebih besar */
+            margin-bottom: 20px;
         }
 
         /* Label */
         label {
             display: block;
-            margin-bottom: 6px;
+            margin-bottom: 8px;
             font-weight: 600;
-            color: #555;
-            font-size: 0.9em;
+            color: #333333;
+            font-size: 0.95em;
         }
 
         /* Input & Select Fields */
@@ -57,65 +57,63 @@
         input[type="email"], 
         select {
             width: 100%;
-            padding: 14px; /* Padding lebih besar */
-            border: 1px solid #e0e0e0;
+            padding: 12px;
+            border: 1px solid #c0c0c0;
             border-radius: 8px;
             box-sizing: border-box;
             font-size: 1em;
-            color: #333;
-            transition: all 0.3s ease;
+            transition: border-color 0.3s, box-shadow 0.3s;
         }
 
         input[type="text"]:focus, 
         input[type="email"]:focus, 
         select:focus {
             border-color: #007bff;
-            box-shadow: 0 0 0 3px rgba(0, 123, 255, 0.15); /* Efek fokus yang lebih lembut */
+            box-shadow: 0 0 0 3px rgba(0, 123, 255, 0.25);
             outline: none;
-            background-color: #fff;
         }
 
         /* Button */
         button {
             background-color: #007bff;
             color: white;
-            padding: 15px 20px;
+            padding: 14px 20px;
             border: none;
             border-radius: 8px;
             cursor: pointer;
             font-size: 1.1em;
-            font-weight: 600;
+            font-weight: bold;
             width: 100%;
-            margin-top: 25px;
-            transition: background-color 0.3s, box-shadow 0.3s;
+            margin-top: 30px;
+            transition: background-color 0.3s, transform 0.1s;
         }
 
         button:hover {
             background-color: #0056b3;
-            box-shadow: 0 4px 10px rgba(0, 90, 180, 0.3);
+            transform: translateY(-1px);
         }
     </style>
 </head>
 <body>
     <div class="form-container">
-        <h1>🚀 Kirim Lamaran Anda</h1>
+        <h1>🔍 Formulir Lamaran Kerja</h1>
         
-        <form action="/kirim-lamaran" method="POST"> 
+        <form action="YOUR_FORMSPREE_ENDPOINT" method="POST"> 
             
             <div class="form-group">
                 <label for="nama">Nama Lengkap:</label>
-                <input type="text" id="nama" name="nama_lengkap" placeholder="Contoh: Budi Santoso" required>
+                <input type="text" id="nama" name="nama_lengkap" placeholder="Masukkan nama lengkap Anda" required>
             </div>
             
             <div class="form-group">
                 <label for="email">Email Kontak:</label>
-                <input type="email" id="email" name="email_kontak" placeholder="alamat.anda@domain.com" required>
+                <input type="email" id="email" name="email_kontak" placeholder="contoh@email.com" required>
             </div>
             
             <div class="form-group">
                 <label for="posisi">Posisi Dilamar:</label>
                 <select id="posisi" name="posisi_diinginkan" required>
-                    <option value="" disabled selected>-- Pilih Posisi --</option>
+                    <option value="" disabled selected>-- Pilih Posisi yang Diinginkan --</option>
                     <option value="Frontend">Frontend Developer</option>
                     <option value="Backend">Backend Engineer</option>
                     <option value="Designer">UI/UX Designer</option>
